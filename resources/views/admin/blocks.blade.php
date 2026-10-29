@@ -27,7 +27,7 @@
                     <th>Section</th>
                     <th>Year</th>
                     <th>Semester</th>
-                    <th>Track</th>
+                    <th>Major</th>
                     <th>Students</th>
                     <th>Actions</th>
                 </tr>
@@ -41,7 +41,7 @@
                     <td>
                         @if($b->track)
                         <span style="background:rgba(240,165,0,.15);color:var(--gold);padding:2px 8px;border-radius:4px;font-size:.75rem;font-weight:700;">
-                            {{ $b->track }}
+                            {{ $b->majorName() }}
                         </span>
                         @else
                         <span style="color:var(--text-muted);font-size:.78rem;">—</span>
@@ -91,7 +91,7 @@
                 </select>
             </div>
             <div class="mb-3" id="trackGroup" style="display:none;">
-                <label class="form-label text-muted small text-uppercase fw-bold">Track (Required for Year 3 & 4)</label>
+                <label class="form-label text-muted small text-uppercase fw-bold">Major (Year 3 & 4)</label>
                 <select name="track" class="form-control bg-dark text-light border-secondary">
                     <option value="">— None —</option>
                     <option value="BA">Business Analytics (BA)</option>

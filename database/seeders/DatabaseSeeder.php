@@ -17,25 +17,14 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        $block1 = Block::firstOrCreate(
-            ['section' => '1101'],
-            [
-                'program' => 'BSIT',
-                'year_level' => 1,
-                'semester' => 1,
-                'track' => null,
-            ]
-        );
-
-        Block::firstOrCreate(
-            ['section' => '1102'],
-            [
-                'program' => 'BSIT',
-                'year_level' => 1,
-                'semester' => 1,
-                'track' => null,
-            ]
-        );
+        $this->call(BlockSeeder::class);
+        $block1 = Block::query()->where([
+            'program' => 'BSIT',
+            'section' => '1101',
+            'year_level' => 1,
+            'semester' => 1,
+            'track' => null,
+        ])->firstOrFail();
 
         User::firstOrCreate(
             ['email' => 'admin@cics.batstate-u.edu.ph'],

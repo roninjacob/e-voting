@@ -46,7 +46,7 @@
             @endphp
             <article class="student-election-card{{ $el->status === 'open' && !$hasVoted ? ' is-open' : '' }}">
                 <div class="student-election-top"><span class="dashboard-icon dashboard-icon--{{ $hasVoted ? 'green' : 'teal' }}"><i class="bi {{ $hasVoted ? 'bi-check-circle' : 'bi-check2-square' }}" aria-hidden="true"></i></span><span class="badge-status {{ $statusClass }}">{{ ucfirst($el->status) }}</span></div>
-                <span class="student-election-block">BSIT {{ $el->block?->section ?? '—' }} &middot; Year {{ $el->block?->year_level ?? '1' }}</span>
+                <span class="student-election-block">BSIT {{ $el->block?->section ?? '—' }} &middot; Year {{ $el->block?->year_level ?? '1' }}@if($el->block) &middot; Sem {{ $el->block->semester }}@if($el->block->track) &middot; {{ $el->block->majorName() }}@endif @endif</span>
                 <h3>{{ $el->title }}</h3>
                 <p class="student-election-description">{{ $el->description ?: 'Help choose the representatives who will lead your block and serve your community.' }}</p>
                 <div class="student-election-dates"><div><span><i class="bi bi-calendar2" aria-hidden="true"></i> Opens</span><strong>{{ $el->starts_at?->format('M d, Y') }}</strong><small>{{ $el->starts_at?->format('g:i A') }}</small></div><div><span><i class="bi bi-calendar2-check" aria-hidden="true"></i> Closes</span><strong>{{ $el->ends_at?->format('M d, Y') }}</strong><small>{{ $el->ends_at?->format('g:i A') }}</small></div></div>
@@ -69,7 +69,7 @@
 
     <aside class="dashboard-stack" aria-label="Student voting guide">
         <section class="dashboard-panel student-guide"><div class="dashboard-panel-head"><div><span class="dashboard-eyebrow">A LITTLE GUIDANCE</span><h2>Make your vote count.</h2></div></div><div class="dashboard-panel-body"><ol><li><span>01</span><div><strong>Get to know the candidates</strong><p>Read their platforms and see what they stand for.</p></div></li><li><span>02</span><div><strong>Choose your representatives</strong><p>Select the people you want to lead your block.</p></div></li><li><span>03</span><div><strong>Review, then submit</strong><p>Check your choices before sending your ballot.</p></div></li></ol><div class="student-guide-tip"><i class="bi bi-lightbulb" aria-hidden="true"></i><p>Take your time. Your choices help shape the CICS community.</p></div></div></section>
-        <section class="student-community-card"><img src="{{ asset('assets/img/cics-logo.png') }}" alt="CICS"><span class="dashboard-eyebrow">YOUR COMMUNITY</span><h2>{{ $studentBlock ? 'BSIT ' . $studentBlock->section : 'CICS student community' }}</h2><p>{{ $studentBlock ? 'BSIT ' . $studentBlock->section . ($studentBlock->track ? ' (' . $studentBlock->track . ')' : '') : 'Your block elections will appear here once a block is assigned.' }}</p></section>
+        <section class="student-community-card"><img src="{{ asset('assets/img/cics-logo.png') }}" alt="CICS"><span class="dashboard-eyebrow">YOUR COMMUNITY</span><h2>{{ $studentBlock ? 'BSIT ' . $studentBlock->section : 'CICS student community' }}</h2><p>{{ $studentBlock ? 'BSIT ' . $studentBlock->section . ' — Year ' . $studentBlock->year_level . ', Sem ' . $studentBlock->semester . ($studentBlock->track ? ' (' . $studentBlock->majorName() . ')' : '') : 'Your block elections will appear here once a block is assigned.' }}</p></section>
     </aside>
 </div>
 </x-layouts.app>

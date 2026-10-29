@@ -32,23 +32,13 @@
         </div>
         @endif
 
+        @if (session('otp_sent'))
+        <div class="portal-registration-notice" role="status">{{ session('otp_sent') }}</div>
+        @endif
+        @if (! session('registration_otp_email'))
         <form method="POST" action="{{ route('register.store') }}" id="regForm">
             @csrf
             <div class="portal-form-section"><span>Student details</span><small>All fields are required</small></div>
-
-            <!-- GSuite Email -->
-            <div class="mb-3">
-                <label class="form-label-dark" for="emailField">GSuite email</label>
-                <div style="position:relative;">
-                    <i class="bi bi-envelope" style="position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--text-muted);"></i>
-                    <input type="email" name="email" id="emailField" class="form-control-dark" autocomplete="username" aria-describedby="emailHint"
-                           style="padding-left:36px;"
-                           value="{{ old('email') }}"
-                           placeholder="23-01041@g.batstate-u.edu.ph"
-                           required>
-                </div>
-                <p class="portal-field-hint" id="emailHint">Format: <code style="color:var(--gold);">YY-NNNNN@g.batstate-u.edu.ph</code></p>
-            </div>
 
             <!-- Full Name -->
             <div class="mb-3">
@@ -63,38 +53,63 @@
                 </div>
             </div>
 
-            <!-- Year Level (drives track visibility) -->
+            <div class="mb-3">
+                <label class="form-label-dark" for="emailField">GSuite email</label>
+                <div style="position:relative;">
+                    <i class="bi bi-envelope" style="position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--text-muted);"></i>
+                    <input type="email" name="email" id="emailField" class="form-control-dark" autocomplete="username" aria-describedby="emailHint"
+                           style="padding-left:36px;"
+                           value="{{ old('email') }}"
+                           placeholder="23-01041@g.batstate-u.edu.ph"
+                           required>
+                </div>
+                <p class="portal-field-hint" id="emailHint">We’ll send a verification code after you submit your student details.</p>
+            </div>
+
+            <!-- Year level -->
             <div class="mb-3">
                 <label class="form-label-dark" for="yearSelect">Year level</label>
                 <div style="position:relative;">
                     <i class="bi bi-mortarboard" style="position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--text-muted);z-index:1;"></i>
-                    <select id="yearSelect" class="form-control-dark" style="padding-left:36px;" required>
+                    <select name="year_level" id="yearSelect" class="form-control-dark" style="padding-left:36px;" required>
                         <option value="">— Select year level —</option>
-                        <option value="1">Year 1</option>
-                        <option value="2">Year 2</option>
-                        <option value="3">Year 3</option>
-                        <option value="4">Year 4</option>
+                        @foreach (range(1, 4) as $yearLevel)
+                            <option value="{{ $yearLevel }}" {{ old('year_level') == $yearLevel ? 'selected' : '' }}>Year {{ $yearLevel }}</option>
+                        @endforeach
                     </select>
                 </div>
             </div>
 
-            <!-- Specialization for Years 3 and 4 -->
+            <!-- Majors for Years 3 and 4 -->
             <div class="mb-3" id="trackRow" style="display:none;">
-                <span class="form-label-dark" id="trackLabel">Specialization track</span>
+                <span class="form-label-dark" id="trackLabel">Major</span>
                 <div class="portal-track-options" role="group" aria-labelledby="trackLabel">
                     <button type="button" id="trackBA" class="track-option" onclick="selectTrack('BA')" aria-pressed="false">
-                        <i class="bi bi-graph-up-arrow" aria-hidden="true"></i><strong>Business Analytics</strong><small>BA Track</small>
+                        <i class="bi bi-graph-up-arrow" aria-hidden="true"></i><strong>Business Analytics</strong><small>BA Major</small>
                     </button>
                     <button type="button" id="trackNT" class="track-option" onclick="selectTrack('NT')" aria-pressed="false">
-                        <i class="bi bi-hdd-network" aria-hidden="true"></i><strong>Networking</strong><small>NT Track</small>
+                        <i class="bi bi-hdd-network" aria-hidden="true"></i><strong>Network Technology</strong><small>NT Major</small>
                     </button>
                 </div>
-                <input type="hidden" id="selectedTrack" value="">
+                <input type="hidden" name="track" id="selectedTrack" value="{{ old('track') }}">
+            </div>
+
+            <!-- Semester -->
+            <div class="mb-3" id="semesterRow" style="display:none;">
+                <label class="form-label-dark" for="semesterSelect">Semester</label>
+                <div style="position:relative;">
+                    <i class="bi bi-calendar3" style="position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--text-muted);z-index:1;"></i>
+                    <select name="semester" id="semesterSelect" class="form-control-dark" style="padding-left:36px;" required disabled>
+                        <option value="">— Select semester —</option>
+                        <option value="1" {{ old('semester') == 1 ? 'selected' : '' }}>First Semester</option>
+                        <option value="2" {{ old('semester') == 2 ? 'selected' : '' }}>Second Semester</option>
+                    </select>
+                </div>
             </div>
 
             <!-- Block Section -->
             <div class="mb-3" id="blockRow" style="display:none;">
-                <label class="form-label-dark" for="blockSelect">Block section</label>
+                <label class="form-label-dark" for="blockSelect">Block</label>
                 <div style="position:relative;">
                     <i class="bi bi-grid" style="position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--text-muted);z-index:1;"></i>
                     <select name="block_id" id="blockSelect" class="form-control-dark" style="padding-left:36px;" required disabled>
@@ -110,10 +125,10 @@
                             @endphp
                             <option value="{{ $b->id }}"
                                     data-year="{{ $b->year_level }}"
+                                    data-semester="{{ $b->semester }}"
                                     data-track="{{ $b->track ?? '' }}"
                                     {{ old('block_id') == $b->id ? 'selected' : '' }}>
-                                Year {{ $b->year_level }}, Sem {{ $b->semester }} — Block {{ $blockNum }}
-                                @if ($b->track) ({{ $b->track }} Track) @endif
+                                Block {{ $blockNum }}@if ($b->track) — {{ $b->majorName() }}@endif
                             </option>
                         @endforeach
                     </select>
@@ -153,10 +168,34 @@
                 <div id="pwdMatch" class="portal-field-hint" aria-live="polite"></div>
             </div>
 
-            <button type="submit" class="portal-submit">Create Account <i class="bi bi-arrow-right" aria-hidden="true"></i></button>
+            <button type="submit" class="portal-submit">Continue to email verification <i class="bi bi-arrow-right" aria-hidden="true"></i></button>
         </form>
 
         <div class="portal-registration-notice"><i class="bi bi-person-check" aria-hidden="true"></i><span>Your adviser will verify your account before you can vote.</span></div>
+        @else
+        <div class="portal-form-section"><span>Verify your email</span><small>Check your inbox</small></div>
+        <p class="portal-field-hint">Your student details are saved. We sent a 6-digit code to <strong>{{ session('registration_otp_email') }}</strong>. The code expires in 10 minutes.</p>
+        <form method="POST" action="{{ route('register.otp.verify') }}" class="mb-3">
+            @csrf
+            <div class="mb-3">
+                <label class="form-label-dark" for="otpField">Email verification code</label>
+                <input type="text" name="otp" id="otpField" class="form-control-dark" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]{6}" maxlength="6" required>
+            </div>
+            <button type="submit" class="portal-submit">Verify code &amp; create account <i class="bi bi-arrow-right" aria-hidden="true"></i></button>
+        </form>
+        <form method="POST" action="{{ route('register.otp.send') }}" class="mb-3">
+            @csrf
+            <button type="submit" class="portal-link" style="background:none;border:0;padding:0;">Resend code</button>
+        </form>
+        @endif
+
+        @if (session('registration_otp_email'))
+        <form method="POST" action="{{ route('register.otp.reset') }}" id="resetEmailVerificationForm">
+            @csrf
+        </form>
+        <button type="submit" form="resetEmailVerificationForm" class="portal-link" style="background:none;border:0;padding:0;">Change student details</button>
+        @endif
+
         <div class="portal-card-note">
             <span>Already have an account? </span>
             <a href="{{ route('login') }}" class="portal-link">Sign In</a>
@@ -171,39 +210,35 @@
 <script>
 const yearSelect    = document.getElementById('yearSelect');
 const trackRow      = document.getElementById('trackRow');
+const semesterRow   = document.getElementById('semesterRow');
+const semesterSelect = document.getElementById('semesterSelect');
 const blockRow      = document.getElementById('blockRow');
 const blockSelect   = document.getElementById('blockSelect');
 const selectedTrack = document.getElementById('selectedTrack');
-let   activeTrack   = '';
 
 if (yearSelect) {
     yearSelect.addEventListener('change', function () {
         const yr = this.value;
-        activeTrack = '';
         if (selectedTrack) selectedTrack.value = '';
         resetTrackUI();
-        if (blockSelect) blockSelect.disabled = true;
+        resetSemesterAndBlock();
 
         if (!yr) {
             if (trackRow) trackRow.style.display = 'none';
-            if (blockRow) blockRow.style.display = 'none';
+            if (semesterRow) semesterRow.style.display = 'none';
             return;
         }
 
         if (yr === '3' || yr === '4') {
             if (trackRow) trackRow.style.display = 'block';
-            if (blockRow) blockRow.style.display = 'none';
         } else {
             if (trackRow) trackRow.style.display = 'none';
-            filterBlocks(yr, '');
-            if (blockRow) blockRow.style.display = 'block';
-            if (blockSelect) blockSelect.disabled = false;
+            showSemesterSelect();
         }
     });
 }
 
 function selectTrack(track) {
-    activeTrack = track;
     if (selectedTrack) selectedTrack.value = track;
     resetTrackUI();
 
@@ -214,9 +249,10 @@ function selectTrack(track) {
         chosen.setAttribute('aria-pressed', 'true');
     }
 
-    filterBlocks(yr, track);
-    if (blockRow) blockRow.style.display = 'block';
-    if (blockSelect) blockSelect.disabled = false;
+    resetSemesterAndBlock();
+    if (yr === '3' || yr === '4') {
+        showSemesterSelect();
+    }
 }
 
 function resetTrackUI() {
@@ -224,17 +260,53 @@ function resetTrackUI() {
         const el = document.getElementById(id);
         if (el) { el.classList.remove('is-selected'); el.setAttribute('aria-pressed', 'false'); }
     });
-    if (blockSelect) blockSelect.value = '';
 }
 
-function filterBlocks(year, track) {
+function resetSemesterAndBlock() {
+    if (semesterSelect) {
+        semesterSelect.value = '';
+        semesterSelect.disabled = true;
+    }
+    if (semesterRow) semesterRow.style.display = 'none';
+    if (blockSelect) {
+        blockSelect.value = '';
+        blockSelect.disabled = true;
+    }
+    if (blockRow) blockRow.style.display = 'none';
+    filterBlocks('', '', '');
+}
+
+function showSemesterSelect() {
+    if (semesterRow) semesterRow.style.display = 'block';
+    if (semesterSelect) semesterSelect.disabled = false;
+}
+
+if (semesterSelect) {
+    semesterSelect.addEventListener('change', function () {
+        const yr = yearSelect ? yearSelect.value : '';
+        const track = selectedTrack ? selectedTrack.value : '';
+        if (!yr || !this.value || ((yr === '3' || yr === '4') && !track)) {
+            if (blockRow) blockRow.style.display = 'none';
+            if (blockSelect) blockSelect.disabled = true;
+            return;
+        }
+
+        filterBlocks(yr, track, this.value);
+        if (blockRow) blockRow.style.display = 'block';
+        if (blockSelect) blockSelect.disabled = false;
+    });
+}
+
+function filterBlocks(year, track, semester) {
     if (!blockSelect) return;
     const opts = blockSelect.querySelectorAll('option[data-year]');
     opts.forEach(opt => {
         const matchYear  = opt.dataset.year  === year;
+        const matchSemester = opt.dataset.semester === semester;
         const matchTrack = track === '' ? opt.dataset.track === '' : opt.dataset.track === track;
-        opt.style.display = (matchYear && matchTrack) ? '' : 'none';
-        opt.disabled = !(matchYear && matchTrack);
+        const isMatch = matchYear && matchSemester && matchTrack;
+        opt.style.display = isMatch ? '' : 'none';
+        opt.disabled = !isMatch;
     });
     blockSelect.value = '';
 }
@@ -267,24 +339,36 @@ if (pwd1 && pwd2) {
     pwd2.addEventListener('input', updatePasswordMatch);
 }
 
-@if (old('block_id'))
 (function () {
-    if (!blockSelect) return;
-    const sel = blockSelect.querySelector('option[value="{{ old('block_id') }}"]');
-    if (!sel) return;
-    const yr    = sel.dataset.year;
-    const track = sel.dataset.track;
-    if (yearSelect) yearSelect.value = yr;
-    if (yr === '3' || yr === '4') {
+    const yearLevel = @json(old('year_level'));
+    const track = @json(old('track'));
+    const semester = @json(old('semester'));
+    const blockId = @json(old('block_id'));
+    if (!yearSelect || !yearLevel) return;
+
+    const year = String(yearLevel);
+    const major = year === '3' || year === '4' ? String(track || '') : '';
+    yearSelect.value = year;
+    if (selectedTrack) selectedTrack.value = major;
+
+    if (year === '3' || year === '4') {
         if (trackRow) trackRow.style.display = 'block';
-        selectTrack(track);
+        if (major) selectTrack(major);
     } else {
-        filterBlocks(yr, '');
-        if (blockRow) blockRow.style.display = 'block';
-        blockSelect.disabled = false;
+        if (trackRow) trackRow.style.display = 'none';
+        showSemesterSelect();
     }
-    blockSelect.value = '{{ old('block_id') }}';
+
+    if (semester && (year === '1' || year === '2' || major)) {
+        semesterSelect.value = String(semester);
+        semesterSelect.dispatchEvent(new Event('change'));
+    }
+    if (blockId && blockSelect) {
+        const selectedBlock = Array.from(blockSelect.options).find(option => option.value === String(blockId));
+        if (selectedBlock && !selectedBlock.disabled) {
+            blockSelect.value = String(blockId);
+        }
+    }
 })();
-@endif
 </script>
 @endpush

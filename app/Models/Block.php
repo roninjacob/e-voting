@@ -19,6 +19,15 @@ class Block extends Model
         return ['year_level' => 'integer', 'semester' => 'integer'];
     }
 
+    public function majorName(): ?string
+    {
+        return match ($this->track) {
+            'BA' => 'Business Analytics',
+            'NT' => 'Network Technology',
+            default => $this->track,
+        };
+    }
+
     public function elections(): HasMany
     {
         return $this->hasMany(Election::class);

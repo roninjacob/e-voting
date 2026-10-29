@@ -24,5 +24,6 @@
         button.setAttribute('aria-pressed', f.type === 'text' ? 'true' : 'false');
     }
     </script>
+    @stack('scripts')
 </body>
 </html>

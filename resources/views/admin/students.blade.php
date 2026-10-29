@@ -13,18 +13,19 @@
     </div>
 </div>
 
-<!-- Section Dropdown -->
+<!-- Block Dropdown -->
 <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;">
-    <label style="color:var(--text-muted);font-size:.82rem;white-space:nowrap;">Filter by Section:</label>
+    <label style="color:var(--text-muted);font-size:.82rem;white-space:nowrap;">Filter by Block:</label>
     <select onchange="window.location=this.value" class="form-control-dark" style="max-width:260px;background:#071e1c;color:#fff;border:1px solid #1a3c39;padding:8px 12px;border-radius:6px;">
-        <option value="{{ route('admin.students.index') }}" {{ $activeSection === null ? 'selected' : '' }}>All Sections</option>
+        <option value="{{ route('admin.students.index') }}" {{ $activeBlockId === null ? 'selected' : '' }}>All Blocks</option>
         @foreach($allBlocks as $blk)
         @php
-            $sec = $blk->section;
-            $hasPending = isset($pending[$sec]);
-            $label = 'BSIT ' . $sec . ($blk->track ? ' (' . $blk->track . ')' : '');
+            $label = 'BSIT ' . $blk->section . ' — Year ' . $blk->year_level . ', Sem ' . $blk->semester;
+            if ($blk->track) {
+                $label .= ' — ' . $blk->majorName();
+            }
         @endphp
-        <option value="{{ route('admin.students.index', ['section' => $sec]) }}" {{ $activeSection === $sec ? 'selected' : '' }}>
+        <option value="{{ route('admin.students.index', ['block_id' => $blk->id]) }}" {{ $activeBlockId == $blk->id ? 'selected' : '' }}>
             {{ $label }}
         </option>
         @endforeach
@@ -37,12 +38,17 @@
     <div class="card-head" style="color:#f0a500;">
         <i class="bi bi-hourglass-split me-2"></i>Pending Verification ({{ $totalPendingCount }})
     </div>
-    @foreach($pending as $section => $students)
+    @foreach($pending as $blockId => $students)
+    @php($block = $students->first()?->block)
     <div style="padding:10px 18px 4px;border-top:1px solid var(--card-border);">
         <span style="font-size:.75rem;font-weight:700;color:var(--gold);">
-            BSIT {{ $section }}
-            @if($students->first()?->block?->track)
-            <span style="color:var(--text-muted);font-weight:400;">({{ $students->first()->block->track }} Track)</span>
+            @if($block)
+            BSIT {{ $block->section }} — Year {{ $block->year_level }}, Sem {{ $block->semester }}
+            @if($block->track)
+            <span style="color:var(--text-muted);font-weight:400;">({{ $block->majorName() }})</span>
+            @endif
+            @else
+            Unassigned
             @endif
         </span>
     </div>
@@ -87,19 +93,32 @@
 <div class="dark-card">
     <div class="card-head">
         <i class="bi bi-people me-2"></i>
-        {{ $activeSection ? 'BSIT ' . $activeSection . ' — Verified Students' : 'Verified Students (' . $totalVerifiedCount . ')' }}
+        @if($activeBlockId)
+        @php($activeBlock = $allBlocks->firstWhere('id', $activeBlockId))
+        Verified Students — BSIT {{ $activeBlock?->section ?? 'Selected Block' }}
+        @if($activeBlock)
+        — Year {{ $activeBlock->year_level }}, Sem {{ $activeBlock->semester }}@if($activeBlock->track) — {{ $activeBlock->majorName() }}@endif
+        @endif
+        @else
+        Verified Students ({{ $totalVerifiedCount }})
+        @endif
     </div>
     @if($verified->isEmpty())
     <div style="text-align:center;color:var(--text-muted);padding:32px;">
-        {{ $activeSection ? 'No verified students in this section.' : 'No verified students yet.' }}
+        {{ $activeBlockId ? 'No verified students in this block.' : 'No verified students yet.' }}
     </div>
     @else
-    @foreach($verified as $section => $students)
+    @foreach($verified as $blockId => $students)
+    @php($block = $students->first()?->block)
     <div style="padding:10px 18px 4px;border-top:1px solid var(--card-border);">
         <span style="font-size:.75rem;font-weight:700;color:var(--gold);">
-            BSIT {{ $section }}
-            @if($students->first()?->block?->track)
-            <span style="color:var(--text-muted);font-weight:400;">({{ $students->first()->block->track }} Track)</span>
+            @if($block)
+            BSIT {{ $block->section }} — Year {{ $block->year_level }}, Sem {{ $block->semester }}
+            @if($block->track)
+            <span style="color:var(--text-muted);font-weight:400;">({{ $block->majorName() }})</span>
+            @endif
+            @else
+            Unassigned
             @endif
             <span style="color:var(--text-muted);font-weight:400;font-size:.7rem;"> — {{ $students->count() }} student{{ $students->count() !== 1 ? 's' : '' }}</span>
         </span>

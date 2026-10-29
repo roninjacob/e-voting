@@ -13,24 +13,24 @@ class StudentController extends Controller
 {
     public function index(Request $request): View
     {
-        $activeSection = $request->input('section');
+        $activeBlockId = $request->input('block_id');
 
         $pendingQuery = User::where('role', 'voter')->where('is_verified', false)->with('block');
         $verifiedQuery = User::where('role', 'voter')->where('is_verified', true)->with('block');
 
-        if ($activeSection) {
-            $pendingQuery->whereHas('block', fn ($q) => $q->where('section', $activeSection));
-            $verifiedQuery->whereHas('block', fn ($q) => $q->where('section', $activeSection));
+        if ($activeBlockId) {
+            $pendingQuery->where('block_id', $activeBlockId);
+            $verifiedQuery->where('block_id', $activeBlockId);
         }
 
-        $pending = $pendingQuery->get()->groupBy(fn ($u) => $u->block?->section ?? 'Unassigned')->sortKeys();
-        $verified = $verifiedQuery->get()->groupBy(fn ($u) => $u->block?->section ?? 'Unassigned')->sortKeys();
-        $allBlocks = Block::orderBy('section')->get();
+        $pending = $pendingQuery->get()->groupBy(fn ($user) => $user->block_id ?? 'Unassigned')->sortKeys();
+        $verified = $verifiedQuery->get()->groupBy(fn ($user) => $user->block_id ?? 'Unassigned')->sortKeys();
+        $allBlocks = Block::query()->orderBy('year_level')->orderBy('semester')->orderBy('section')->orderBy('track')->get();
 
         $totalPendingCount = User::where('role', 'voter')->where('is_verified', false)->count();
         $totalVerifiedCount = User::where('role', 'voter')->where('is_verified', true)->count();
 
-        return view('admin.students', compact('pending', 'verified', 'allBlocks', 'activeSection', 'totalPendingCount', 'totalVerifiedCount'));
+        return view('admin.students', compact('pending', 'verified', 'allBlocks', 'activeBlockId', 'totalPendingCount', 'totalVerifiedCount'));
     }
 
     public function verify(User $user): RedirectResponse

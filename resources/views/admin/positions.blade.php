@@ -7,7 +7,7 @@
         <h2 style="margin-bottom:4px;">{{ $election->title }}</h2>
         <div class="election-status-bar">
             <span class="badge-status badge-{{ $election->status }}">{{ ucfirst($election->status) }}</span>
-            <span style="color:var(--text-muted);">BSIT {{ $election->block?->section ?? '' }}</span>
+            <span style="color:var(--text-muted);">BSIT {{ $election->block?->section ?? '' }}@if($election->block) — Year {{ $election->block->year_level }}, Sem {{ $election->block->semester }}@if($election->block->track) — {{ $election->block->majorName() }}@endif @endif</span>
         </div>
     </div>
 </div>

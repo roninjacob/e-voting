@@ -49,6 +49,18 @@ return [
             'local_domain' => env('MAIL_EHLO_DOMAIN', parse_url((string) env('APP_URL', 'http://localhost'), PHP_URL_HOST)),
         ],
 
+        'evoting' => [
+            'transport' => 'smtp',
+            'scheme' => env('EVOTING_MAIL_SCHEME'),
+            'url' => null,
+            'host' => env('EVOTING_MAIL_HOST', env('MAIL_HOST', '127.0.0.1')),
+            'port' => env('EVOTING_MAIL_PORT', env('MAIL_PORT', 587)),
+            'username' => env('EVOTING_MAIL_USERNAME', env('MAIL_USERNAME')),
+            'password' => env('EVOTING_MAIL_PASSWORD', env('MAIL_PASSWORD')),
+            'timeout' => null,
+            'local_domain' => env('MAIL_EHLO_DOMAIN', parse_url((string) env('APP_URL', 'http://localhost'), PHP_URL_HOST)),
+        ],
+
         'ses' => [
             'transport' => 'ses',
         ],
@@ -113,6 +125,10 @@ return [
     'from' => [
         'address' => env('MAIL_FROM_ADDRESS', 'hello@example.com'),
         'name' => env('MAIL_FROM_NAME', env('APP_NAME', 'Laravel')),
+    ],
+
+    'evoting' => [
+        'from_address' => env('EVOTING_MAIL_FROM_EMAIL', env('MAIL_FROM_ADDRESS', 'hello@example.com')),
     ],
 
 ];

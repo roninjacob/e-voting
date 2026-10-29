@@ -20,7 +20,10 @@ Route::middleware('guest')->group(function (): void {
     Route::post('/login', [AuthenticatedSessionController::class, 'store'])->middleware('throttle:6,1')->name('login.store');
     Route::post('/admin/login', [AuthenticatedSessionController::class, 'store'])->middleware('throttle:6,1')->name('admin.login.store');
     Route::get('/register', [RegisteredUserController::class, 'create'])->name('register');
-    Route::post('/register', [RegisteredUserController::class, 'store'])->middleware('throttle:6,1')->name('register.store');
+    Route::post('/register/email-otp', [RegisteredUserController::class, 'sendEmailOtp'])->middleware('throttle:3,1')->name('register.otp.send');
+    Route::post('/register/email-otp/verify', [RegisteredUserController::class, 'verifyEmailOtp'])->middleware('throttle:6,1')->name('register.otp.verify');
+    Route::post('/register/email-otp/reset', [RegisteredUserController::class, 'resetEmailVerification'])->name('register.otp.reset');
+    Route::post('/register', [RegisteredUserController::class, 'store'])->middleware('throttle:3,1')->name('register.store');
 });
 
 Route::middleware('auth')->group(function (): void {

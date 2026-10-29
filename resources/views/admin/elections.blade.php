@@ -23,7 +23,7 @@
                 <select class="form-control bg-dark text-light border-secondary" name="block_id" required>
                     <option value="">— Select Block —</option>
                     @foreach($blocks as $block)
-                        <option value="{{ $block->id }}">BSIT {{ $block->section }} (Year {{ $block->year_level }})</option>
+                        <option value="{{ $block->id }}">BSIT {{ $block->section }} — Year {{ $block->year_level }}, Sem {{ $block->semester }}@if($block->track) — {{ $block->majorName() }}@endif</option>
                     @endforeach
                 </select>
             </div>
@@ -78,7 +78,11 @@
                 <tr>
                     <td style="color:var(--text-muted);">{{ $el->id }}</td>
                     <td style="font-weight:600;">{{ $el->title }}</td>
-                    <td style="color:var(--text-muted);">BSIT {{ $el->block?->section ?? '' }}</td>
+                    <td style="color:var(--text-muted);">
+                        @if($el->block)
+                        BSIT {{ $el->block->section }} — Year {{ $el->block->year_level }}, Sem {{ $el->block->semester }}@if($el->block->track) — {{ $el->block->majorName() }}@endif
+                        @endif
+                    </td>
                     <td><span class="badge-status {{ $statusClass }}">{{ ucfirst($el->status) }}</span></td>
                     <td style="color:var(--text-muted);font-size:.78rem;">{{ $el->starts_at?->format('M d, Y') }}</td>
                     <td style="color:var(--text-muted);font-size:.78rem;">{{ $el->ends_at?->format('M d, Y') }}</td>

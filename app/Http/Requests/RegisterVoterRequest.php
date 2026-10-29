@@ -3,7 +3,9 @@
 namespace App\Http\Requests;
 
 use Illuminate\Contracts\Validation\ValidationRule;
+use Illuminate\Database\Query\Builder;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class RegisterVoterRequest extends FormRequest
 {
@@ -24,9 +26,34 @@ class RegisterVoterRequest extends FormRequest
     {
         return [
             'name' => ['required', 'string', 'max:255'],
-            'student_id' => ['required', 'string', 'max:50', 'unique:users,student_id'],
-            'email' => ['required', 'email', 'max:255', 'unique:users,email'],
-            'block_id' => ['required', 'exists:blocks,id'],
+            'email' => [
+                'required',
+                'email',
+                'max:255',
+                'unique:users,email',
+            ],
+            'year_level' => ['required', 'integer', 'between:1,4'],
+            'track' => [
+                'nullable',
+                Rule::requiredIf(in_array((int) $this->input('year_level'), [3, 4], true)),
+                Rule::prohibitedIf(in_array((int) $this->input('year_level'), [1, 2], true)),
+                Rule::in(['BA', 'NT']),
+            ],
+            'semester' => ['required', 'integer', 'between:1,2'],
+            'block_id' => [
+                'required',
+                'integer',
+                Rule::exists('blocks', 'id')->where(function (Builder $query): void {
+                    $query->where('year_level', $this->input('year_level'))
+                        ->where('semester', $this->input('semester'));
+
+                    if ($this->input('track')) {
+                        $query->where('track', $this->input('track'));
+                    } else {
+                        $query->whereNull('track');
+                    }
+                }),
+            ],
             'password' => ['required', 'confirmed', 'min:8'],
         ];
     }
