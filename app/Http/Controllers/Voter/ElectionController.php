@@ -12,7 +12,11 @@ class ElectionController extends Controller
     public function index(Request $request): View
     {
         $user = $request->user();
-        $elections = Election::query()->where('block_id', $user->block_id)->with('block')->orderByDesc('starts_at')->get();
+        $elections = Election::query()
+            ->where(fn ($query) => $query->where('scope', 'all_cics')->orWhere('block_id', $user->block_id))
+            ->with('block')
+            ->orderByDesc('starts_at')
+            ->get();
         $votedElectionIds = $user->voteReceipts()->pluck('election_id')->all();
 
         return view('voter.elections', compact('elections', 'votedElectionIds'));

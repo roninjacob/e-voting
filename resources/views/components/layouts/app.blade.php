@@ -51,7 +51,7 @@
                     @if(auth()->user()->isElectionManager())
                         <div class="student-id">{{ ucfirst(auth()->user()->role) }} Account</div>
                     @else
-                        <div class="student-id">Student ID: {{ auth()->user()->student_id }}</div>
+                        <div class="student-id">Student ID: {{ auth()->user()->student_id ?: explode('@', auth()->user()->email)[0] }}</div>
                     @endif
                 </div>
             </div>
@@ -75,9 +75,11 @@
             <a href="{{ route('voter.elections') }}" class="{{ request()->routeIs('voter.elections') ? 'active' : '' }}">
                 <i class="bi bi-clipboard2-check"></i> {{ auth()->user()->isElectionManager() ? 'Student elections' : 'My dashboard' }}
             </a>
-            <a href="{{ route('voter.elections') }}">
-                <i class="bi bi-check2-square"></i> My Ballot
-            </a>
+            @unless(auth()->user()->isElectionManager())
+                <a href="{{ route('voter.records') }}" class="{{ request()->routeIs('voter.records') ? 'active' : '' }}">
+                    <i class="bi bi-receipt"></i> My Voting Record
+                </a>
+            @endunless
 
             <div class="nav-section">Account</div>
             <form method="POST" action="{{ route('logout') }}" id="logoutForm">

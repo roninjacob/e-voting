@@ -1,15 +1,19 @@
 <?php
 
+use App\Http\Controllers\Admin\AuditLogController;
 use App\Http\Controllers\Admin\BlockController;
 use App\Http\Controllers\Admin\CandidateController;
 use App\Http\Controllers\Admin\ElectionController as AdminElectionController;
 use App\Http\Controllers\Admin\PositionController;
+use App\Http\Controllers\Admin\ResultsController;
 use App\Http\Controllers\Admin\StudentController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\Voter\BallotController;
 use App\Http\Controllers\Voter\ElectionController as VoterElectionController;
+use App\Http\Controllers\Voter\PublishedResultsController;
+use App\Http\Controllers\Voter\VotingRecordController;
 use Illuminate\Support\Facades\Route;
 
 Route::redirect('/', '/dashboard');
@@ -31,8 +35,11 @@ Route::middleware('auth')->group(function (): void {
     Route::get('/dashboard', DashboardController::class)->name('dashboard');
     Route::prefix('voter')->name('voter.')->group(function (): void {
         Route::get('/elections', [VoterElectionController::class, 'index'])->name('elections');
+        Route::get('/records', [VotingRecordController::class, 'index'])->name('records');
         Route::get('/elections/{election}/ballot', [BallotController::class, 'show'])->name('ballot.show');
         Route::post('/elections/{election}/ballot', [BallotController::class, 'store'])->name('ballot.store');
+        Route::get('/elections/{election}/results', [PublishedResultsController::class, 'show'])->name('results.show');
+        Route::get('/elections/{election}/results/export', [PublishedResultsController::class, 'export'])->name('results.export');
     });
     Route::prefix('admin')->name('admin.')->middleware('role:admin,adviser,committee')->group(function (): void {
         Route::get('/blocks', [BlockController::class, 'index'])->name('blocks.index');
@@ -53,5 +60,8 @@ Route::middleware('auth')->group(function (): void {
         Route::get('/elections/{election}/candidates', [CandidateController::class, 'index'])->name('candidates.index');
         Route::post('/elections/{election}/positions/{position}/candidates', [CandidateController::class, 'store'])->name('candidates.store');
         Route::delete('/elections/{election}/candidates/{candidate}', [CandidateController::class, 'destroy'])->name('candidates.destroy');
+        Route::get('/results', [ResultsController::class, 'index'])->name('results.index');
+        Route::get('/elections/{election}/results', [ResultsController::class, 'show'])->name('results.show');
+        Route::get('/audit-log', [AuditLogController::class, 'index'])->name('audit-log.index');
     });
 });
