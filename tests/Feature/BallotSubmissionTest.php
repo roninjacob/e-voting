@@ -25,8 +25,20 @@ class BallotSubmissionTest extends TestCase
 
         $this->actingAs($voter)->post(route('voter.ballot.store', $election), $payload)->assertRedirect(route('voter.elections'));
         $this->assertDatabaseCount('vote_receipts', 1);
+        $this->assertDatabaseCount('ballot_votes', 1);
+        $this->assertDatabaseHas('ballot_votes', [
+            'election_id' => $election->id,
+            'position_id' => $position->id,
+            'candidate_id' => $candidate->id,
+        ]);
         $this->assertDatabaseMissing('vote_receipts', ['payload_hash' => (string) $candidate->id]);
+        $this->assertDatabaseHas('audit_logs', [
+            'actor_id' => $voter->id,
+            'election_id' => $election->id,
+            'action' => 'ballot_submitted',
+        ]);
         $this->actingAs($voter)->post(route('voter.ballot.store', $election), $payload)->assertStatus(422);
         $this->assertDatabaseCount('vote_receipts', 1);
+        $this->assertDatabaseCount('ballot_votes', 1);
     }
 }

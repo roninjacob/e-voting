@@ -1,7 +1,7 @@
 <x-layouts.app title="My Ballot">
 <div class="page-header d-flex justify-content-between align-items-center">
     <div>
-        <h2>My Ballot</h2>
+        <h1>My Ballot</h1>
         <div class="election-status-bar">
             <div class="status-dot"></div>
             <span class="status-label">{{ $election->title }}</span>
@@ -19,7 +19,7 @@
     <div class="dark-card mb-4">
         <div class="card-head">
             {{ $position->name }}
-            <span style="font-size:.72rem;color:var(--text-muted);font-weight:400;text-transform:none;">
+            <span style="font-size:.875rem;color:var(--text-muted);font-weight:400;text-transform:none;">
                 Select up to {{ $position->max_votes }}
                 @if($position->is_required) <span style="color:#e74c3c;">*</span> @endif
             </span>
@@ -47,9 +47,9 @@
                             <i class="bi bi-person-circle" style="font-size:2.5rem;color:var(--text-muted);"></i>
                         </div>
                         @endif
-                        <div style="font-size:.85rem;font-weight:700;color:#fff;" class="fw-semibold">{{ $candidate->full_name }}</div>
+                        <div style="font-size:.9375rem;font-weight:700;color:#fff;" class="fw-semibold">{{ $candidate->full_name }}</div>
                         @if($candidate->party)
-                        <div style="font-size:.72rem;color:var(--gold);">{{ $candidate->party }}</div>
+                        <div style="font-size:.8125rem;color:var(--gold);">{{ $candidate->party }}</div>
                         @endif
                     </label>
                 </div>
@@ -76,7 +76,7 @@
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <p style="font-size:.82rem;color:var(--text-muted);">
+                <p style="font-size:.9375rem;color:var(--text-muted);">
                     Are you sure you want to finalize your selections?<br>
                     Changes cannot be made after submission.
                 </p>
@@ -97,6 +97,11 @@
 @push('scripts')
 <script>
 document.addEventListener('DOMContentLoaded', () => {
+    const confirmModal = document.getElementById('confirmModal');
+    if (confirmModal) {
+        document.body.appendChild(confirmModal);
+    }
+
     document.querySelectorAll('.candidate-group').forEach(group => {
         const max = parseInt(group.dataset.max) || 1;
         group.querySelectorAll('.candidate-checkbox').forEach(cb => {

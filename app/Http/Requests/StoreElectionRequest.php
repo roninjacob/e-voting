@@ -4,6 +4,7 @@ namespace App\Http\Requests;
 
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class StoreElectionRequest extends FormRequest
 {
@@ -23,7 +24,8 @@ class StoreElectionRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'block_id' => ['required', 'exists:blocks,id'],
+            'scope' => ['required', Rule::in(['block', 'all_cics'])],
+            'block_id' => ['nullable', 'required_if:scope,block', 'prohibited_if:scope,all_cics', 'exists:blocks,id'],
             'title' => ['required', 'string', 'max:200'],
             'description' => ['nullable', 'string'],
             'starts_at' => ['required', 'date'],

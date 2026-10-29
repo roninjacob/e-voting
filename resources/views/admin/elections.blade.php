@@ -18,16 +18,23 @@
     <div class="card-body-inner">
         <form method="POST" action="{{ route('admin.elections.store') }}" class="row g-3">
             @csrf
-            <div class="col-md-3">
+            <div class="col-md-2">
+                <label class="form-label text-muted small text-uppercase fw-bold">Election Scope</label>
+                <select class="form-control bg-dark text-light border-secondary" name="scope" id="electionScope" required>
+                    <option value="block">Block election</option>
+                    <option value="all_cics">Student Council — All CICS</option>
+                </select>
+            </div>
+            <div class="col-md-2" id="electionBlockField">
                 <label class="form-label text-muted small text-uppercase fw-bold">Block</label>
-                <select class="form-control bg-dark text-light border-secondary" name="block_id" required>
+                <select class="form-control bg-dark text-light border-secondary" name="block_id" id="electionBlock">
                     <option value="">— Select Block —</option>
                     @foreach($blocks as $block)
                         <option value="{{ $block->id }}">BSIT {{ $block->section }} — Year {{ $block->year_level }}, Sem {{ $block->semester }}@if($block->track) — {{ $block->majorName() }}@endif</option>
                     @endforeach
                 </select>
             </div>
-            <div class="col-md-3">
+            <div class="col-md-2">
                 <label class="form-label text-muted small text-uppercase fw-bold">Election Title</label>
                 <input class="form-control bg-dark text-light border-secondary" name="title" placeholder="e.g. BSIT 1101 Student Council Election" required>
             </div>
@@ -79,8 +86,9 @@
                     <td style="color:var(--text-muted);">{{ $el->id }}</td>
                     <td style="font-weight:600;">{{ $el->title }}</td>
                     <td style="color:var(--text-muted);">
+                        {{ $el->scopeLabel() }}
                         @if($el->block)
-                        BSIT {{ $el->block->section }} — Year {{ $el->block->year_level }}, Sem {{ $el->block->semester }}@if($el->block->track) — {{ $el->block->majorName() }}@endif
+                        — Year {{ $el->block->year_level }}, Sem {{ $el->block->semester }}@if($el->block->track) — {{ $el->block->majorName() }}@endif
                         @endif
                     </td>
                     <td><span class="badge-status {{ $statusClass }}">{{ ucfirst($el->status) }}</span></td>
@@ -90,6 +98,9 @@
                         <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;">
                             <a href="{{ route('admin.positions.index', $el) }}" class="btn-sm-icon" title="Manage Positions"><i class="bi bi-diagram-3"></i></a>
                             <a href="{{ route('admin.candidates.index', $el) }}" class="btn-sm-icon" title="Manage Candidates"><i class="bi bi-people"></i></a>
+                            @if(in_array($el->status, ['closed', 'published']))
+                            <a href="{{ route('admin.results.show', $el) }}" class="btn-sm-icon" title="View Results"><i class="bi bi-bar-chart"></i></a>
+                            @endif
 
                             @if(!in_array($el->status, ['published']))
                             <form method="POST" action="{{ route('admin.elections.transition', $el) }}" style="display:inline;" onsubmit="return confirm('Advance election status?');">
@@ -117,4 +128,24 @@
         </table>
     </div>
 </div>
+
+@push('scripts')
+<script>
+    const electionScope = document.getElementById('electionScope');
+    const electionBlockField = document.getElementById('electionBlockField');
+    const electionBlock = document.getElementById('electionBlock');
+
+    function updateElectionScope() {
+        const isBlockElection = electionScope.value === 'block';
+        electionBlockField.style.display = isBlockElection ? '' : 'none';
+        electionBlock.required = isBlockElection;
+        if (!isBlockElection) {
+            electionBlock.value = '';
+        }
+    }
+
+    electionScope.addEventListener('change', updateElectionScope);
+    updateElectionScope();
+</script>
+@endpush
 </x-layouts.app>
