@@ -4,6 +4,7 @@ use App\Http\Controllers\Admin\BlockController;
 use App\Http\Controllers\Admin\CandidateController;
 use App\Http\Controllers\Admin\ElectionController as AdminElectionController;
 use App\Http\Controllers\Admin\PositionController;
+use App\Http\Controllers\Admin\StudentController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Controllers\DashboardController;
@@ -15,7 +16,9 @@ Route::redirect('/', '/dashboard');
 
 Route::middleware('guest')->group(function (): void {
     Route::get('/login', [AuthenticatedSessionController::class, 'create'])->name('login');
+    Route::get('/admin/login', [AuthenticatedSessionController::class, 'createAdmin'])->name('admin.login');
     Route::post('/login', [AuthenticatedSessionController::class, 'store'])->middleware('throttle:6,1')->name('login.store');
+    Route::post('/admin/login', [AuthenticatedSessionController::class, 'store'])->middleware('throttle:6,1')->name('admin.login.store');
     Route::get('/register', [RegisteredUserController::class, 'create'])->name('register');
     Route::post('/register', [RegisteredUserController::class, 'store'])->middleware('throttle:6,1')->name('register.store');
 });
@@ -32,6 +35,10 @@ Route::middleware('auth')->group(function (): void {
         Route::get('/blocks', [BlockController::class, 'index'])->name('blocks.index');
         Route::post('/blocks', [BlockController::class, 'store'])->name('blocks.store');
         Route::delete('/blocks/{block}', [BlockController::class, 'destroy'])->name('blocks.destroy');
+        Route::get('/students', [StudentController::class, 'index'])->name('students.index');
+        Route::post('/students/{user}/verify', [StudentController::class, 'verify'])->name('students.verify');
+        Route::delete('/students/{user}/reject', [StudentController::class, 'reject'])->name('students.reject');
+        Route::delete('/students/{user}', [StudentController::class, 'destroy'])->name('students.destroy');
         Route::get('/elections', [AdminElectionController::class, 'index'])->name('elections.index');
         Route::post('/elections', [AdminElectionController::class, 'store'])->name('elections.store');
         Route::put('/elections/{election}', [AdminElectionController::class, 'update'])->name('elections.update');

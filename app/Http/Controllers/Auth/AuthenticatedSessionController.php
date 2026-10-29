@@ -16,6 +16,11 @@ class AuthenticatedSessionController extends Controller
         return view('auth.login');
     }
 
+    public function createAdmin(): View
+    {
+        return view('auth.admin-login');
+    }
+
     public function store(LoginRequest $request): RedirectResponse
     {
         $credentials = $request->safe()->only(['email', 'password']);

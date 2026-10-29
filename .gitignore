@@ -10,6 +10,8 @@
 /.codex
 /.agents/
 /.claude/
+/E_VOTING/
+/legacy-app/
 /.cursor/
 /.idea
 /.nova
