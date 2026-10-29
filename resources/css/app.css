@@ -1,5 +1,5 @@
 @import 'bootstrap/dist/css/bootstrap.min.css';
 
-body {
-    background-color: #f8f9fa;
-}
+:root { --ev-teal: #42b3ad; --ev-deep: #061a18; --ev-panel: rgba(6, 26, 24, .88); --ev-muted: #8bd0cc; }
+body { min-height: 100vh; background: linear-gradient(135deg, #24625f, #061a18); color: #e0faf8; }
+.ev-shell { min-height: 100vh; display: flex; }.ev-sidebar { width: 240px; background: var(--ev-panel); border-right: 1px solid rgba(66,179,173,.2); }.ev-brand { background: linear-gradient(90deg, var(--ev-teal), #24625f); }.ev-sidebar a { color: var(--ev-muted); text-decoration: none; display: block; padding: .75rem 1rem; border-left: 3px solid transparent; }.ev-sidebar a:hover, .ev-sidebar a.active { color: white; background: rgba(66,179,173,.13); border-left-color: var(--ev-teal); }.ev-content { flex: 1; padding: 2rem; }.ev-card, .card { background: var(--ev-panel); color: #e0faf8; border: 1px solid rgba(66,179,173,.2); }.text-muted, .text-body-secondary { color: var(--ev-muted) !important; }.form-control, .form-select { background: rgba(255,255,255,.08); color: white; border-color: rgba(66,179,173,.25); }.form-control:focus, .form-select:focus { background: rgba(255,255,255,.1); color: white; border-color: var(--ev-teal); box-shadow: 0 0 0 .25rem rgba(66,179,173,.2); }.form-select option { color: #111; }.btn-primary { background: var(--ev-teal); border-color: var(--ev-teal); }.btn-primary:hover { background: #35908b; border-color: #35908b; }.candidate-card { cursor: pointer; transition: .15s; border: 2px solid rgba(255,255,255,.1); }.candidate-card:has(input:checked) { border-color: var(--ev-teal); background: rgba(66,179,173,.16); }@media (max-width: 768px) { .ev-shell { display: block; }.ev-sidebar { width: 100%; }.ev-content { padding: 1rem; } }
