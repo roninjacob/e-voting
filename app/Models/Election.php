@@ -13,7 +13,32 @@ class Election extends Model
     /** @use HasFactory<ElectionFactory> */
     use HasFactory;
 
-    protected $fillable = ['block_id', 'title', 'description', 'starts_at', 'ends_at', 'status', 'created_by'];
+    protected $fillable = ['block_id', 'scope', 'title', 'description', 'starts_at', 'ends_at', 'status', 'created_by'];
+
+    public function isAllCics(): bool
+    {
+        return $this->scope === 'all_cics';
+    }
+
+    public function isEligible(User $user): bool
+    {
+        return $user->role === 'voter'
+            && $user->is_active
+            && $user->is_verified
+            && ($this->isAllCics() || $user->block_id === $this->block_id);
+    }
+
+    public function isOpenForVoting(): bool
+    {
+        return $this->status === 'open'
+            && ! $this->starts_at->isFuture()
+            && $this->ends_at->isFuture();
+    }
+
+    public function scopeLabel(): string
+    {
+        return $this->isAllCics() ? 'All CICS blocks' : ($this->block ? 'BSIT '.$this->block->section : 'No block');
+    }
 
     protected function casts(): array
     {
@@ -43,5 +68,15 @@ class Election extends Model
     public function voteReceipts(): HasMany
     {
         return $this->hasMany(VoteReceipt::class);
+    }
+
+    public function ballotVotes(): HasMany
+    {
+        return $this->hasMany(BallotVote::class);
+    }
+
+    public function resultSnapshots(): HasMany
+    {
+        return $this->hasMany(ElectionResultSnapshot::class);
     }
 }

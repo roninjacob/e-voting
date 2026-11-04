@@ -54,4 +54,17 @@ npm run build
 
 ## Current scope
 
-The project now has a Bootstrap 5 frontend baseline and only the default Laravel database migrations. Authentication, election management, candidates, voting, audit logs, and published results must be implemented in their assigned modules.
+The application currently includes:
+
+- Student registration with email OTP verification and administrative approval
+- Separate voter and administrator authentication flows
+- Block and CICS-wide election management
+- Position and candidate management
+- Eligibility-aware ballot access and one-time ballot submission
+- Anonymous vote storage with voter-facing submission receipts
+- Administrative turnout, reconciliation, and aggregate result views
+- Published voter result views with CSV export
+- Voter submission records that never expose candidate selections
+- Security-relevant audit logs and published-result snapshots
+
+Continue to treat eligibility, ballot finalization, result publication, and audit-log changes as security-sensitive work that requires tests and review.

@@ -1,7 +1,7 @@
 <x-layouts.app title="My Dashboard">
 @php
     $user = auth()->user();
-    $readyCount = $elections->filter(fn($el) => $el->status === 'open' && !in_array($el->id, $votedElectionIds))->count();
+    $readyCount = $elections->filter(fn($el) => $el->isOpenForVoting() && !in_array($el->id, $votedElectionIds))->count();
     $submittedCount = count($votedElectionIds);
     $firstName = explode(' ', trim($user->name))[0];
     $studentBlock = $user->block;
@@ -24,7 +24,7 @@
     @php $cards = [
         ['label'=>'Ready to vote', 'value'=>$readyCount, 'icon'=>'bi-check2-square', 'tone'=>'teal', 'note'=>'Open ballots waiting for you'],
         ['label'=>'Votes submitted', 'value'=>$submittedCount, 'icon'=>'bi-check-circle', 'tone'=>'green', 'note'=>'Your participation so far'],
-        ['label'=>'Available elections', 'value'=>$elections->count(), 'icon'=>'bi-stack', 'tone'=>'blue', 'note'=>'Elections for your block'],
+        ['label'=>'Available elections', 'value'=>$elections->count(), 'icon'=>'bi-stack', 'tone'=>'blue', 'note'=>'Elections available to you'],
     ]; @endphp
     @foreach ($cards as $card)
     <article class="dashboard-stat"><div class="dashboard-stat-top"><span>{{ $card['label'] }}</span><span class="dashboard-icon dashboard-icon--{{ $card['tone'] }}"><i class="bi {{ $card['icon'] }}" aria-hidden="true"></i></span></div><strong>{{ $card['value'] }}</strong><small>{{ $card['note'] }}</small></article>
@@ -33,7 +33,7 @@
 
 <div class="dashboard-columns dashboard-columns--student">
     <section id="student-election-list" aria-labelledby="student-elections-heading">
-        <div class="dashboard-section-head"><div><span class="dashboard-eyebrow">YOUR NEXT CHAPTER</span><h2 id="student-elections-heading">My block elections</h2><p>Find your ballot and make your choice count.</p></div><span class="dashboard-soft-label">{{ $elections->count() }} election{{ $elections->count() !== 1 ? 's' : '' }}</span></div>
+        <div class="dashboard-section-head"><div><span class="dashboard-eyebrow">YOUR NEXT CHAPTER</span><h2 id="student-elections-heading">Available elections</h2><p>Find your ballot and make your choice count.</p></div><span class="dashboard-soft-label">{{ $elections->count() }} election{{ $elections->count() !== 1 ? 's' : '' }}</span></div>
         @if ($elections->isEmpty())
         <div class="dashboard-panel dashboard-empty"><span class="dashboard-empty-icon"><i class="bi bi-inbox" aria-hidden="true"></i></span><h3>Something good is on the way.</h3><p>No elections are available for your block yet. Check back here when your campus is ready to vote.</p><span class="dashboard-soft-label"><i class="bi bi-clock" aria-hidden="true"></i> Stay tuned</span></div>
         @else
@@ -41,24 +41,35 @@
             @foreach ($elections as $el)
             @php
                 $hasVoted = in_array($el->id, $votedElectionIds);
+                $isOpenForVoting = $el->isOpenForVoting();
                 $statusClasses = ['draft'=>'badge-draft','configured'=>'badge-configured','open'=>'badge-open','closed'=>'badge-closed','published'=>'badge-published'];
                 $statusClass = $statusClasses[$el->status] ?? 'badge-draft';
             @endphp
-            <article class="student-election-card{{ $el->status === 'open' && !$hasVoted ? ' is-open' : '' }}">
+            <article class="student-election-card{{ $isOpenForVoting && !$hasVoted ? ' is-open' : '' }}">
                 <div class="student-election-top"><span class="dashboard-icon dashboard-icon--{{ $hasVoted ? 'green' : 'teal' }}"><i class="bi {{ $hasVoted ? 'bi-check-circle' : 'bi-check2-square' }}" aria-hidden="true"></i></span><span class="badge-status {{ $statusClass }}">{{ ucfirst($el->status) }}</span></div>
-                <span class="student-election-block">BSIT {{ $el->block?->section ?? '—' }} &middot; Year {{ $el->block?->year_level ?? '1' }}@if($el->block) &middot; Sem {{ $el->block->semester }}@if($el->block->track) &middot; {{ $el->block->majorName() }}@endif @endif</span>
+                <span class="student-election-block">
+                    @if($el->block)
+                        BSIT {{ $el->block->section }} &middot; Year {{ $el->block->year_level }} &middot; Sem {{ $el->block->semester }}@if($el->block->track) &middot; {{ $el->block->majorName() }}@endif
+                    @else
+                        College-wide &middot; All CICS students
+                    @endif
+                </span>
                 <h3>{{ $el->title }}</h3>
                 <p class="student-election-description">{{ $el->description ?: 'Help choose the representatives who will lead your block and serve your community.' }}</p>
                 <div class="student-election-dates"><div><span><i class="bi bi-calendar2" aria-hidden="true"></i> Opens</span><strong>{{ $el->starts_at?->format('M d, Y') }}</strong><small>{{ $el->starts_at?->format('g:i A') }}</small></div><div><span><i class="bi bi-calendar2-check" aria-hidden="true"></i> Closes</span><strong>{{ $el->ends_at?->format('M d, Y') }}</strong><small>{{ $el->ends_at?->format('g:i A') }}</small></div></div>
                 <div class="student-election-action">
                     @if ($hasVoted)
                     <div class="student-vote-submitted"><i class="bi bi-check-circle-fill" aria-hidden="true"></i><span>Vote submitted<small>Thank you for taking part.</small></span></div>
-                    @elseif ($el->status === 'open' && $user->is_verified)
+                    @elseif ($isOpenForVoting)
                     <a href="{{ route('voter.ballot.show', $el) }}" class="dashboard-button">Vote now <i class="bi bi-arrow-right" aria-hidden="true"></i></a>
                     @elseif (!$user->is_verified)
                     <span class="student-voting-closed"><i class="bi bi-hourglass-split" aria-hidden="true"></i> Account pending verification</span>
+                    @elseif ($el->status === 'published')
+                    <a href="{{ route('voter.results.show', $el) }}" class="dashboard-button">View results <i class="bi bi-bar-chart" aria-hidden="true"></i></a>
+                    @elseif ($el->status === 'open' && $el->starts_at->isFuture())
+                    <span class="student-voting-closed"><i class="bi bi-clock" aria-hidden="true"></i> Voting is scheduled</span>
                     @else
-                    <span class="student-voting-closed"><i class="bi bi-lock" aria-hidden="true"></i> {{ $el->status === 'published' ? 'Results have been published' : 'Voting has closed' }}</span>
+                    <span class="student-voting-closed"><i class="bi bi-lock" aria-hidden="true"></i> Voting has closed</span>
                     @endif
                 </div>
             </article>

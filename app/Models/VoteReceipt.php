@@ -14,6 +14,17 @@ class VoteReceipt extends Model
         return ['submitted_at' => 'datetime'];
     }
 
+    public static function computePayloadHash(string $receiptReference): string
+    {
+        $key = (string) config('app.key');
+        if (str_starts_with($key, 'base64:')) {
+            $decodedKey = base64_decode(substr($key, 7), true);
+            $key = $decodedKey === false ? $key : $decodedKey;
+        }
+
+        return hash_hmac('sha256', $receiptReference, $key);
+    }
+
     public function election(): BelongsTo
     {
         return $this->belongsTo(Election::class);

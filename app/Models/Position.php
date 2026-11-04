@@ -29,4 +29,9 @@ class Position extends Model
     {
         return $this->hasMany(Candidate::class);
     }
+
+    public function ballotVotes(): HasMany
+    {
+        return $this->hasMany(BallotVote::class);
+    }
 }

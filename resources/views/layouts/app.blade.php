@@ -51,7 +51,7 @@
                     @if(auth()->user()->isElectionManager())
                         <div class="student-id">{{ ucfirst(auth()->user()->role) }} Account</div>
                     @else
-                        <div class="student-id">Student ID: {{ auth()->user()->student_id }}</div>
+                        <div class="student-id">Student ID: {{ auth()->user()->student_id ?: explode('@', auth()->user()->email)[0] }}</div>
                     @endif
                 </div>
             </div>
@@ -65,9 +65,6 @@
             </a>
             <a href="{{ route('admin.elections.index') }}" class="{{ request()->routeIs('admin.elections.*') ? 'active' : '' }}">
                 <i class="bi bi-list-check"></i> Manage Elections
-            </a>
-            <a href="{{ route('admin.cics-sc.elections.index') }}" class="{{ request()->routeIs('admin.cics-sc.*') ? 'active' : '' }}">
-                <i class="bi bi-people"></i> Manage CICS-SC Elections
             </a>
             <a href="{{ route('admin.blocks.index') }}" class="{{ request()->routeIs('admin.blocks.*') ? 'active' : '' }}">
                 <i class="bi bi-grid-3x3-gap"></i> Manage Blocks
@@ -87,12 +84,18 @@
             <a href="{{ route('voter.elections') }}" class="{{ request()->routeIs('voter.elections') ? 'active' : '' }}">
                 <i class="bi bi-clipboard2-check"></i> {{ auth()->user()->isElectionManager() ? 'Student elections' : 'My dashboard' }}
             </a>
-            <a href="{{ route('voter.elections') }}">
-                <i class="bi bi-check2-square"></i> My Ballot
-            </a>
-            <a href="{{ route('cics-sc.elections') }}" class="{{ request()->routeIs('cics-sc.*') ? 'active' : '' }}">
-                <i class="bi bi-people"></i> CICS-SC Elections
-            </a>
+            @if(auth()->user()->isElectionManager())
+                <a href="{{ route('admin.results.index') }}" class="{{ request()->routeIs('admin.results.*') ? 'active' : '' }}">
+                    <i class="bi bi-bar-chart"></i> Results
+                </a>
+                <a href="{{ route('admin.audit-log.index') }}" class="{{ request()->routeIs('admin.audit-log.*') ? 'active' : '' }}">
+                    <i class="bi bi-journal-text"></i> Audit Log
+                </a>
+            @else
+                <a href="{{ route('voter.records') }}" class="{{ request()->routeIs('voter.records') ? 'active' : '' }}">
+                    <i class="bi bi-receipt"></i> My Voting Record
+                </a>
+            @endif
 
             <div class="nav-section">Account</div>
             <form method="POST" action="{{ route('logout') }}" id="logoutForm">

@@ -97,7 +97,7 @@
                     <li>
                         <span class="dashboard-timeline-dot{{ $log->to_status === 'open' ? ' is-live' : '' }}" aria-hidden="true"></span>
                         <div>
-                            <p><strong>{{ $log->changer?->name ?? 'System' }}</strong> moved <strong>{{ $log->election?->title }}</strong> to <span class="badge-status {{ $statusClasses[$log->to_status] ?? 'badge-draft' }}">{{ ucfirst($log->to_status) }}</span></p>
+                            <p><strong>{{ $log->changedBy?->name ?? 'System' }}</strong> moved <strong>{{ $log->election?->title }}</strong> to <span class="badge-status {{ $statusClasses[$log->to_status] ?? 'badge-draft' }}">{{ ucfirst($log->to_status) }}</span></p>
                             <time datetime="{{ $log->changed_at }}">{{ \Carbon\Carbon::parse($log->changed_at)->diffForHumans() }}</time>
                         </div>
                     </li>
