@@ -32,7 +32,9 @@ class CandidateController extends Controller
     public function destroy(Election $election, Candidate $candidate): RedirectResponse
     {
         abort_unless($candidate->position->election_id === $election->id && $election->status === 'draft', 404);
-        Storage::disk('public')->delete($candidate->photo_path);
+        if ($candidate->photo_path) {
+            Storage::disk('public')->delete($candidate->photo_path);
+        }
         $candidate->delete();
 
         return back()->with('status', 'Candidate removed.');

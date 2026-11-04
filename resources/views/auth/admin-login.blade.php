@@ -79,7 +79,7 @@
 
             <div class="text-end mb-4">
                 <a href="#" class="portal-link">
-                    Forgot Password?
+                    Contact your system administrator for account recovery.
                 </a>
             </div>
 

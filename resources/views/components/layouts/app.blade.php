@@ -70,6 +70,9 @@
                 <i class="bi bi-grid-3x3-gap"></i> Manage Blocks
             </a>
             <div class="nav-section">Voter</div>
+            <a href="{{ route('admin.students.index') }}"> <i class="bi bi-people"></i> Student Verification</a>
+            <a href="{{ route('admin.results.index') }}"> <i class="bi bi-bar-chart"></i> Election Results</a>
+            <a href="{{ route('admin.audit-log.index') }}"> <i class="bi bi-journal-text"></i> Audit Log</a>
             @endif
 
             <a href="{{ route('voter.elections') }}" class="{{ request()->routeIs('voter.elections') ? 'active' : '' }}">
@@ -96,6 +99,12 @@
     <!-- ── Main Content ── -->
     <main class="main-content" id="main-content">
         <div class="flash-wrap">
+            @if($errors->any())
+            <div class="alert alert-danger" role="alert" tabindex="-1">
+                <strong>Please check your entries.</strong>
+                <ul class="mb-0">@foreach($errors->all() as $error)<li>{{ $error }}</li>@endforeach</ul>
+            </div>
+            @endif
             @if(session('success'))
                 <div class="alert alert-success alert-dismissible fade show" role="alert">
                     <i class="bi bi-check-circle me-1"></i> {{ session('success') }}
@@ -132,9 +141,15 @@
     const appSidebar = document.getElementById('appSidebar');
     if (navToggle && appSidebar) {
         navToggle.addEventListener('click', () => {
-            appSidebar.classList.toggle('show');
+            document.body.classList.toggle('sidebar-open');
             const expanded = navToggle.getAttribute('aria-expanded') === 'true';
             navToggle.setAttribute('aria-expanded', !expanded);
+        });
+        document.addEventListener('keydown', (event) => {
+            if (event.key === 'Escape') {
+                document.body.classList.remove('sidebar-open');
+                navToggle.setAttribute('aria-expanded', 'false');
+            }
         });
     }
 </script>

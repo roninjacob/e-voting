@@ -108,4 +108,24 @@ class BallotSubmissionTest extends TestCase
         $this->assertDatabaseCount('vote_receipts', 0);
         $this->assertDatabaseCount('ballot_votes', 0);
     }
+
+    public function test_ballot_rejects_positions_from_another_election_without_recording_votes(): void
+    {
+        $block = Block::create(['program' => 'BSIT', 'section' => 'A', 'year_level' => 1, 'semester' => 1]);
+        $voter = User::factory()->create(['role' => 'voter', 'block_id' => $block->id, 'is_verified' => true, 'is_active' => true]);
+        $election = Election::create(['title' => 'Election', 'block_id' => $block->id, 'status' => 'open', 'starts_at' => now()->subHour(), 'ends_at' => now()->addHour()]);
+        $position = Position::create(['name' => 'President', 'election_id' => $election->id, 'max_votes' => 1]);
+        $candidate = Candidate::create(['full_name' => 'Candidate', 'position_id' => $position->id]);
+        $otherElection = Election::create(['title' => 'Other election', 'block_id' => $block->id, 'starts_at' => now(), 'ends_at' => now()->addDay()]);
+        $otherPosition = Position::create(['name' => 'President', 'election_id' => $otherElection->id, 'max_votes' => 1]);
+        $otherCandidate = Candidate::create(['full_name' => 'Other candidate', 'position_id' => $otherPosition->id]);
+
+        $this->actingAs($voter)->post(route('voter.ballot.store', $election), ['selections' => [
+            $position->id => [$candidate->id],
+            $otherPosition->id => [$otherCandidate->id],
+        ]])->assertStatus(422);
+
+        $this->assertDatabaseCount('vote_receipts', 0);
+        $this->assertDatabaseCount('ballot_votes', 0);
+    }
 }

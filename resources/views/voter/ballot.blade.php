@@ -131,7 +131,28 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     document.getElementById('btnSubmitVotes')?.addEventListener('click', () => {
+        const button = document.getElementById('btnSubmitVotes');
+        button.disabled = true;
+        button.textContent = 'Submitting ballot…';
         document.getElementById('ballotForm').submit();
+    });
+    confirmModal?.addEventListener('show.bs.modal', (event) => {
+        const summary = document.getElementById('confirmSummary');
+        summary.replaceChildren();
+        let valid = true;
+        document.querySelectorAll('.candidate-group').forEach(group => {
+            const selected = [...group.querySelectorAll('.candidate-checkbox:checked')];
+            if (group.dataset.required === '1' && selected.length === 0) {
+                valid = false;
+            }
+            const row = document.createElement('p');
+            row.textContent = group.dataset.position + ': ' + (selected.map(input => input.closest('.candidate-card').querySelector('.fw-semibold').textContent.trim()).join(', ') || 'Abstain');
+            summary.appendChild(row);
+        });
+        if (!valid) {
+            event.preventDefault();
+            alert('Please select a candidate for every required position.');
+        }
     });
 });
 </script>

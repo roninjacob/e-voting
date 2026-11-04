@@ -81,9 +81,7 @@
             </div>
 
             <div class="text-end mb-4">
-                <a href="#" class="portal-link">
-                    Forgot Password?
-                </a>
+                <span class="small" style="color:var(--text-muted);">Forgot your password? Contact your election administrator.</span>
             </div>
 
             <button type="submit" class="portal-submit">

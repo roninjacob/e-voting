@@ -62,6 +62,9 @@ class ElectionController extends Controller
             abort_unless(! $election->positions()->whereDoesntHave('candidates', fn ($query) => $query->where('is_active', true))->exists(), 422, 'Every position needs at least one active candidate before opening.');
         }
         DB::transaction(function () use ($election, $next, $request): void {
+            $expectedStatus = $election->status;
+            $election = Election::query()->lockForUpdate()->findOrFail($election->id);
+            abort_unless($election->status === $expectedStatus, 422, 'Election status changed. Refresh and try again.');
             $from = $election->status;
             $election->update(['status' => $next]);
             ElectionStatusLog::create(['election_id' => $election->id, 'from_status' => $from, 'to_status' => $next, 'changed_by' => $request->user()->id]);

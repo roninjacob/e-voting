@@ -32,9 +32,11 @@ class BallotController extends Controller
 
         DB::transaction(function () use ($request, $election, $selections, $user): void {
             $lockedElection = Election::query()->lockForUpdate()->findOrFail($election->id);
+            abort_unless($lockedElection->isOpenForVoting() && $lockedElection->isEligible($user), 404);
             abort_if(VoteReceipt::query()->where('election_id', $lockedElection->id)->where('voter_id', $user->id)->exists(), 422, 'You have already submitted this ballot.');
 
             $positions = $lockedElection->positions()->with(['candidates' => fn ($query) => $query->where('is_active', true)])->get()->keyBy('id');
+            abort_if(array_diff(array_keys($selections), $positions->keys()->all()) !== [], 422, 'Invalid ballot position.');
             foreach ($positions as $position) {
                 $selected = array_values(array_unique(array_map('intval', $selections[$position->id] ?? [])));
                 abort_if($position->is_required && $selected === [], 422, "{$position->name} requires a selection.");
