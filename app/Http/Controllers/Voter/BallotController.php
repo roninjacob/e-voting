@@ -43,6 +43,9 @@ class BallotController extends Controller
 
     private function eligible(Request $request, Election $election): bool
     {
-        return $request->user()->is_verified && $request->user()->block_id === $election->block_id;
+        return $request->user()->role === 'voter'
+            && $request->user()->is_active
+            && $request->user()->is_verified
+            && $request->user()->block_id === $election->block_id;
     }
 }

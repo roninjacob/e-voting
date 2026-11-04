@@ -66,6 +66,9 @@
             <a href="{{ route('admin.elections.index') }}" class="{{ request()->routeIs('admin.elections.*') ? 'active' : '' }}">
                 <i class="bi bi-list-check"></i> Manage Elections
             </a>
+            <a href="{{ route('admin.cics-sc.elections.index') }}" class="{{ request()->routeIs('admin.cics-sc.*') ? 'active' : '' }}">
+                <i class="bi bi-people"></i> Manage CICS-SC Elections
+            </a>
             <a href="{{ route('admin.blocks.index') }}" class="{{ request()->routeIs('admin.blocks.*') ? 'active' : '' }}">
                 <i class="bi bi-grid-3x3-gap"></i> Manage Blocks
             </a>
@@ -86,6 +89,9 @@
             </a>
             <a href="{{ route('voter.elections') }}">
                 <i class="bi bi-check2-square"></i> My Ballot
+            </a>
+            <a href="{{ route('cics-sc.elections') }}" class="{{ request()->routeIs('cics-sc.*') ? 'active' : '' }}">
+                <i class="bi bi-people"></i> CICS-SC Elections
             </a>
 
             <div class="nav-section">Account</div>

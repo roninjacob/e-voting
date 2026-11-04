@@ -26,7 +26,10 @@ class StoreCandidateRequest extends FormRequest
             'full_name' => ['required', 'string', 'max:150'],
             'party' => ['nullable', 'string', 'max:100'],
             'platform' => ['nullable', 'string'],
-            'photo' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
+            'education' => ['required', 'string', 'max:5000'],
+            'experience' => ['required', 'string', 'max:5000'],
+            'awards' => ['required', 'string', 'max:5000'],
+            'photo' => ['required', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
             'is_active' => ['nullable', 'boolean'],
         ];
     }

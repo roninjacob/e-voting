@@ -8,6 +8,7 @@ use App\Models\Candidate;
 use App\Models\Election;
 use App\Models\Position;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
 
 class CandidateController extends Controller
@@ -22,9 +23,7 @@ class CandidateController extends Controller
         abort_unless($position->election_id === $election->id && $election->status === 'draft', 404);
         $data = $request->safe()->except('photo');
         $data['is_active'] = $request->boolean('is_active', true);
-        if ($request->hasFile('photo')) {
-            $data['photo_path'] = $request->file('photo')->store('candidate-photos');
-        }
+        $data['photo_path'] = $request->file('photo')->store('candidate-photos', 'public');
         $position->candidates()->create($data);
 
         return back()->with('status', 'Candidate added.');
@@ -33,6 +32,7 @@ class CandidateController extends Controller
     public function destroy(Election $election, Candidate $candidate): RedirectResponse
     {
         abort_unless($candidate->position->election_id === $election->id && $election->status === 'draft', 404);
+        Storage::disk('public')->delete($candidate->photo_path);
         $candidate->delete();
 
         return back()->with('status', 'Candidate removed.');

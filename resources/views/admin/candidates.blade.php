@@ -29,7 +29,24 @@
                 <label class="form-label text-muted small text-uppercase fw-bold">Party / Affiliation</label>
                 <input class="form-control bg-dark text-light border-secondary" name="party" placeholder="Party (optional)">
             </div>
-            <div class="col-md-3 d-flex align-items-end">
+            <div class="col-md-6">
+                <label class="form-label text-muted small text-uppercase fw-bold">Education</label>
+                <textarea class="form-control bg-dark text-light border-secondary" name="education" rows="2" placeholder="Education and qualifications" required></textarea>
+            </div>
+            <div class="col-md-6">
+                <label class="form-label text-muted small text-uppercase fw-bold">Experience</label>
+                <textarea class="form-control bg-dark text-light border-secondary" name="experience" rows="2" placeholder="Leadership or relevant experience" required></textarea>
+            </div>
+            <div class="col-md-6">
+                <label class="form-label text-muted small text-uppercase fw-bold">Awards</label>
+                <textarea class="form-control bg-dark text-light border-secondary" name="awards" rows="2" placeholder="Awards and achievements" required></textarea>
+            </div>
+            <div class="col-md-4">
+                <label class="form-label text-muted small text-uppercase fw-bold">Candidate Photo</label>
+                <input class="form-control bg-dark text-light border-secondary" type="file" name="photo" accept=".jpg,.jpeg,.png,.webp" required>
+                <small class="text-muted">JPG, PNG, or WebP; maximum 2 MB.</small>
+            </div>
+            <div class="col-md-2 d-flex align-items-end">
                 <button type="submit" class="btn w-100" style="background:var(--gold);border:none;color:#061a18;font-weight:700;">Add Candidate</button>
             </div>
         </form>
@@ -39,8 +56,14 @@
             @forelse($position->candidates as $candidate)
             <div class="col-md-4">
                 <div class="p-3 rounded" style="background:rgba(6,26,24,0.6); border:1px solid var(--card-border);">
+                    @if($candidate->photo_path)
+                    <img src="{{ asset('storage/'.$candidate->photo_path) }}" class="rounded-circle mb-2" style="width:72px;height:72px;object-fit:cover;" alt="{{ $candidate->full_name }}">
+                    @endif
                     <strong style="color:#fff; font-size:1.05rem;">{{ $candidate->full_name }}</strong><br>
                     <small style="color:var(--text-muted);">Party: {{ $candidate->party ?: 'Independent' }}</small>
+                    <p class="mb-1 mt-2" style="color:var(--text-muted);font-size:.8rem;"><strong>Education:</strong> {{ $candidate->education ?: 'Not provided' }}</p>
+                    <p class="mb-1" style="color:var(--text-muted);font-size:.8rem;"><strong>Experience:</strong> {{ $candidate->experience ?: 'Not provided' }}</p>
+                    <p class="mb-0" style="color:var(--text-muted);font-size:.8rem;"><strong>Awards:</strong> {{ $candidate->awards ?: 'Not provided' }}</p>
                 </div>
             </div>
             @empty

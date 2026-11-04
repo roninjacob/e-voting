@@ -40,8 +40,8 @@
                                value="{{ $candidate->id }}"
                                class="visually-hidden candidate-checkbox">
                         @if($candidate->photo_path)
-                        <img src="{{ asset($candidate->photo_path) }}"
-                             class="rounded-circle mb-2" style="width:64px;height:64px;object-fit:cover;" alt="{{ $candidate->full_name }}">
+                        <img src="{{ asset('storage/'.$candidate->photo_path) }}"
+                             class="rounded-circle mb-2" style="width:96px;height:96px;object-fit:cover;" alt="{{ $candidate->full_name }}">
                         @else
                         <div class="mb-2">
                             <i class="bi bi-person-circle" style="font-size:2.5rem;color:var(--text-muted);"></i>
@@ -51,6 +51,11 @@
                         @if($candidate->party)
                         <div style="font-size:.72rem;color:var(--gold);">{{ $candidate->party }}</div>
                         @endif
+                        <div class="text-start mt-3" style="font-size:.72rem;color:var(--text-muted);">
+                            <div><strong>Education:</strong> {{ $candidate->education ?: 'Not provided' }}</div>
+                            <div class="mt-1"><strong>Experience:</strong> {{ $candidate->experience ?: 'Not provided' }}</div>
+                            <div class="mt-1"><strong>Awards:</strong> {{ $candidate->awards ?: 'Not provided' }}</div>
+                        </div>
                     </label>
                 </div>
                 @endforeach

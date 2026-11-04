@@ -2,6 +2,9 @@
 
 use App\Http\Controllers\Admin\BlockController;
 use App\Http\Controllers\Admin\CandidateController;
+use App\Http\Controllers\Admin\CicsScCandidateController;
+use App\Http\Controllers\Admin\CicsScElectionController;
+use App\Http\Controllers\Admin\CicsScPositionController;
 use App\Http\Controllers\Admin\ElectionController as AdminElectionController;
 use App\Http\Controllers\Admin\PositionController;
 use App\Http\Controllers\Admin\StudentController;
@@ -9,6 +12,8 @@ use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\Voter\BallotController;
+use App\Http\Controllers\Voter\CicsScBallotController;
+use App\Http\Controllers\Voter\CicsScElectionController as VoterCicsScElectionController;
 use App\Http\Controllers\Voter\ElectionController as VoterElectionController;
 use Illuminate\Support\Facades\Route;
 
@@ -34,6 +39,11 @@ Route::middleware('auth')->group(function (): void {
         Route::get('/elections/{election}/ballot', [BallotController::class, 'show'])->name('ballot.show');
         Route::post('/elections/{election}/ballot', [BallotController::class, 'store'])->name('ballot.store');
     });
+    Route::prefix('cics-sc')->name('cics-sc.')->group(function (): void {
+        Route::get('/elections', [VoterCicsScElectionController::class, 'index'])->name('elections');
+        Route::get('/elections/{cicsScElection}/ballot', [CicsScBallotController::class, 'show'])->name('ballot.show');
+        Route::post('/elections/{cicsScElection}/ballot', [CicsScBallotController::class, 'store'])->name('ballot.store');
+    });
     Route::prefix('admin')->name('admin.')->middleware('role:admin,adviser,committee')->group(function (): void {
         Route::get('/blocks', [BlockController::class, 'index'])->name('blocks.index');
         Route::post('/blocks', [BlockController::class, 'store'])->name('blocks.store');
@@ -53,5 +63,18 @@ Route::middleware('auth')->group(function (): void {
         Route::get('/elections/{election}/candidates', [CandidateController::class, 'index'])->name('candidates.index');
         Route::post('/elections/{election}/positions/{position}/candidates', [CandidateController::class, 'store'])->name('candidates.store');
         Route::delete('/elections/{election}/candidates/{candidate}', [CandidateController::class, 'destroy'])->name('candidates.destroy');
+        Route::prefix('cics-sc')->name('cics-sc.')->group(function (): void {
+            Route::get('/elections', [CicsScElectionController::class, 'index'])->name('elections.index');
+            Route::post('/elections', [CicsScElectionController::class, 'store'])->name('elections.store');
+            Route::put('/elections/{cicsScElection}', [CicsScElectionController::class, 'update'])->name('elections.update');
+            Route::delete('/elections/{cicsScElection}', [CicsScElectionController::class, 'destroy'])->name('elections.destroy');
+            Route::post('/elections/{cicsScElection}/transition', [CicsScElectionController::class, 'transition'])->name('elections.transition');
+            Route::get('/elections/{cicsScElection}/positions', [CicsScPositionController::class, 'index'])->name('positions.index');
+            Route::post('/elections/{cicsScElection}/positions', [CicsScPositionController::class, 'store'])->name('positions.store');
+            Route::delete('/elections/{cicsScElection}/positions/{cicsScPosition}', [CicsScPositionController::class, 'destroy'])->name('positions.destroy');
+            Route::get('/elections/{cicsScElection}/candidates', [CicsScCandidateController::class, 'index'])->name('candidates.index');
+            Route::post('/elections/{cicsScElection}/positions/{cicsScPosition}/candidates', [CicsScCandidateController::class, 'store'])->middleware('role:admin')->name('candidates.store');
+            Route::delete('/elections/{cicsScElection}/candidates/{cicsScCandidate}', [CicsScCandidateController::class, 'destroy'])->middleware('role:admin')->name('candidates.destroy');
+        });
     });
 });

@@ -12,7 +12,7 @@ class Candidate extends Model
     /** @use HasFactory<CandidateFactory> */
     use HasFactory;
 
-    protected $fillable = ['position_id', 'full_name', 'party', 'platform', 'photo_path', 'is_active'];
+    protected $fillable = ['position_id', 'full_name', 'party', 'platform', 'education', 'experience', 'awards', 'photo_path', 'is_active'];
 
     protected function casts(): array
     {
